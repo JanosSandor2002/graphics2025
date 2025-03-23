@@ -1,5 +1,6 @@
 Sándor János, Neptunkód: U03GDK, Miskolci Egyetem, Számítógépes Grafika
-1. Pohár vízzel grafikus feladat
+1. Pohár vízzel grafikus feladat:  
+
     A projekt során egy interaktív 3D-s virtuális tér jön létre, ahol a felhasználó egy hatalmas pohár belsejébe léphet be, és a kamera szabadon mozoghat benne. A pohár kezdetben vízzel van tele, és a belső tér sötét, így a felhasználó csak a pohár falait és a víz szintjét látja.
 
     A felhasználó a kamerát billentyűzetével és egérrel irányíthatja, és ahogy a kamera lefelé mozog a pohár belsejében, a környezeti fények fokozatosan változnak. Amint a kamera eléri a pohár felét, a környezet kivilágosodik, és a pohár falai fokozatosan átlátszóvá válnak, így láthatóvá válik a víz szintje és a pohár környezete.
