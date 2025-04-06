@@ -25,6 +25,7 @@
 		A poharat visszaállítja az eredeti pozícióba (víz nélkül).
 
 - interakciók:
+
 	kamera_iranyitas: "WASD + egér"
 
 	fenyero_szabalyozas: "+" és "-" billentyűk
