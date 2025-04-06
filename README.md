@@ -15,7 +15,7 @@
 		A fény fokozatosan erősödik.
 		A pohár falai lassan áttetszővé válnak.
 	
-	- 3. alj_elérése:
+	- 3. alj_elerese:
 		A pohár feldől.
 		A víz kifolyik egy animációval.
 		A pohár teljesen kiürül.
@@ -29,24 +29,24 @@
 
 	fenyero_szabalyozas: "+" és "-" billentyűk
 
-	segítség: "F1 gombbal megjelenő használati útmutató"
+	segitseg: "F1 gombbal megjelenő használati útmutató"
 
-	víz_szimulálása:
+	viz_szimulalasa:
 		Egyszerű átlátszó kék objektum (pl. félhenger vagy doboz).
 		Vízszint animáció: objektum magasságának csökkentése.
 		Kifolyás: skálázás + animált textúra/mesh.
 
-	víz_felett_alatt_különbség:
+	viz_felett_alatt_kulonbseg:
 		Víz alatt: kékes filter, gyengébb fény, torzítás (shader vagy effekt).
 		Víz felett: normál fényerő, tiszta látvány.
 		Megvalósítás: kamera pozícióhoz kötött shader-váltás.
 
-	kamera_víz_interakció:
+	kamera_viz_interakcio:
 		Nincs fizikai interakció.
 		A kamera csak vizuális effekteket vált ki.
 		Extra: lefelé mozgásnál szűrt látvány (blur, színváltás stb.)
 
-	pohár_környezete:
+	pohar_kornyezete:
 		Egyszerű tér (végtelen padló + világos háttér).
 		Vagy stílusos letisztult 3D környezet (pl. üvegterem).
 		Fókusz: a pohár belső világa.
