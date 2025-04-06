@@ -1,12 +1,52 @@
-Sándor János, Neptunkód: U03GDK, Miskolci Egyetem, Számítógépes Grafika
-1. Pohár vízzel grafikus feladat:  
+# Sándor János, Neptunkód: U03GDK, Miskolci Egyetem, Számítógépes Grafika
 
-    A projekt során egy interaktív 3D-s virtuális tér jön létre, ahol a felhasználó egy hatalmas pohár belsejébe léphet be, és a kamera szabadon mozoghat benne. A pohár kezdetben vízzel van tele, és a belső tér sötét, így a felhasználó csak a pohár falait és a víz szintjét látja.
+## Pohár vízzel – 3D grafikus feladat (kibővített leírás)
 
-    A felhasználó a kamerát billentyűzetével és egérrel irányíthatja, és ahogy a kamera lefelé mozog a pohár belsejében, a környezeti fények fokozatosan változnak. Amint a kamera eléri a pohár felét, a környezet kivilágosodik, és a pohár falai fokozatosan átlátszóvá válnak, így láthatóvá válik a víz szintje és a pohár környezete.
+- project:
+	A felhasználó egy óriási pohár belsejébe kerül egy 3D-s térben.
+	A kamera szabadon mozgatható egérrel és billentyűzettel.
 
-    Ahogy a kamera eléri a pohár alját, a pohár hirtelen feldől, és a víz kiömlik belőle. Ekkor a pohár üres lesz, és a víz eltűnik. A víz kifolyása egy animált folyamatként jelenik meg, amit az üres pohár követ.
+- scenes:
+	- 1. kezdeti_allapot:
+		A pohár tele van vízzel.
+		A tér sötét, csak a falak és a víz szintje látszik.
+	
+	- 2. kamera_leereszkedese:
+		A fény fokozatosan erősödik.
+		A pohár falai lassan áttetszővé válnak.
+	
+	- 3. alj_elérése:
+		A pohár feldől.
+		A víz kifolyik egy animációval.
+		A pohár teljesen kiürül.
+	
+	- 4. utojelenet:
+		Egy animált kocka görbén végighalad a pohár külső falán.
+		A poharat visszaállítja az eredeti pozícióba (víz nélkül).
 
-    Miután a víz kifolyt, egy különleges animáció lép életbe: egy görbén mozgó kocka, amely mintha a pohár falához tapadna, végigmegy a pohár külső oldalán. A kocka célja, hogy visszahelyezze a poharat az eredeti pozíciójába, ám most már víz nélkül, és a pohár visszatér a kezdeti állapotába.
+- interakciók:
+	kamera_iranyitas: "WASD + egér"
 
-    Természetesen az F1 gomb megnyomására előjön egy használati utasítás, a "+" és "-" gombokkal a fényerőt is lehet állítani.
+	fenyero_szabalyozas: "+" és "-" billentyűk
+
+	segítség: "F1 gombbal megjelenő használati útmutató"
+
+	víz_szimulálása:
+		Egyszerű átlátszó kék objektum (pl. félhenger vagy doboz).
+		Vízszint animáció: objektum magasságának csökkentése.
+		Kifolyás: skálázás + animált textúra/mesh.
+
+	víz_felett_alatt_különbség:
+		Víz alatt: kékes filter, gyengébb fény, torzítás (shader vagy effekt).
+		Víz felett: normál fényerő, tiszta látvány.
+		Megvalósítás: kamera pozícióhoz kötött shader-váltás.
+
+	kamera_víz_interakció:
+		Nincs fizikai interakció.
+		A kamera csak vizuális effekteket vált ki.
+		Extra: lefelé mozgásnál szűrt látvány (blur, színváltás stb.)
+
+	pohár_környezete:
+		Egyszerű tér (végtelen padló + világos háttér).
+		Vagy stílusos letisztult 3D környezet (pl. üvegterem).
+		Fókusz: a pohár belső világa.
