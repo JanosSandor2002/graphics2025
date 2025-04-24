@@ -3,7 +3,8 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "C:\\Users\\User\\Desktop\\c_sdk_220203\\MinGW\\include\\SDL2"
             ],
             "defines": [
                 "_DEBUG",
