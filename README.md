@@ -1,6 +1,7 @@
 # Pohár vízzel – 3D grafikus feladat (kibővített leírás)
 
 - project:
+
 	A felhasználó egy óriási pohár belsejébe kerül egy 3D-s térben.
 	A kamera szabadon mozgatható egérrel és billentyűzettel.
 
