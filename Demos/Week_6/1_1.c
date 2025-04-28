@@ -9,7 +9,7 @@ typedef struct{
 int setSize(Cuboid *cuboid, double a, double b, double c){
     if(a <= 0 || b <= 0 || c <= 0){
         printf("Hibás input, 0-tól nagyobb hossz kell");
-        return 0;
+        return 0; //df
     }
     cuboid->a = a;
     cuboid->b = b;
