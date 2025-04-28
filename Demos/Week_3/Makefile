@@ -1,4 +1,4 @@
 All:
-	gcc 3.c -o 3.exe -lSDL2 -mconsole
+	gcc main.c -o main.exe -lSDL2
 
 
