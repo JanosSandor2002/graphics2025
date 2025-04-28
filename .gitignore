@@ -2,3 +2,9 @@ Demos/Week_1/1_1.exe
 Demos/Week_2/matrix.exe
 Demos/Week_3/main.exe
 Demos/Week_4/pong.exe
+Demos/Week_5/origin.exe
+Demos/Week_5/src/app.o
+Demos/Week_5/src/camera.o
+Demos/Week_5/src/main.o
+Demos/Week_5/src/scene.o
+Demos/Week_5/src/utils.o

@@ -4,12 +4,17 @@
 #include <GL/glu.h>  // GLU könyvtár
 #include <math.h> 
 
-void init_scene(Scene* scene) {}
+void init_scene(Scene* scene) {
+    (void)scene;
+}
 
-void update_scene(Scene* scene) {}
+void update_scene(Scene* scene) {
+    (void)scene;
+}
 
 void render_scene(const Scene* scene)
 {
+    (void)scene;
     draw_origin();
     draw_triangle();
     draw_sphere();

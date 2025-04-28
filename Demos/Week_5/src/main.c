@@ -1,13 +1,16 @@
+#define SDL_MAIN_HANDLED
 #include "app.h"
 #include <stdio.h>
-#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
 /**
  * Main function
  */
 int main(int argc, char* argv[])
-{
+{   
+    (void)argc;
+    (void)argv;
+
     App app;
 
     init_app(&app, 800, 600);

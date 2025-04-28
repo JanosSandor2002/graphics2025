@@ -5,13 +5,14 @@
 
 typedef struct Scene
 {
+    int _dummy;
 } Scene;
 
 /**
  * Initialize the scene by loading models.
  */
 void init_scene(Scene* scene);
-
+    
 /**
  * Update the scene.
  */
