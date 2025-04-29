@@ -228,3 +228,57 @@ void destroy_app(App* app)
 
     SDL_Quit();
 }
+
+// A kocka kirajzolása
+void draw_cube() {
+    glBegin(GL_QUADS);
+        // Elülső oldal
+        glNormal3f(0.0f, 0.0f, 1.0f); // Normál vektor
+        glColor3f(1.0f, 0.0f, 0.0f);   // Szín piros
+        glVertex3f(-0.5f, -0.5f, 0.5f);  // bal alsó
+        glVertex3f(0.5f, -0.5f, 0.5f);   // jobb alsó
+        glVertex3f(0.5f, 0.5f, 0.5f);    // jobb felső
+        glVertex3f(-0.5f, 0.5f, 0.5f);   // bal felső
+    
+        // Hátulsó oldal
+        glNormal3f(0.0f, 0.0f, -1.0f); // Normál vektor
+        glColor3f(0.0f, 1.0f, 0.0f);   // Szín zöld
+        glVertex3f(-0.5f, -0.5f, -0.5f); // bal alsó
+        glVertex3f(0.5f, -0.5f, -0.5f);  // jobb alsó
+        glVertex3f(0.5f, 0.5f, -0.5f);   // jobb felső
+        glVertex3f(-0.5f, 0.5f, -0.5f);  // bal felső
+    
+        // Bal oldal
+        glNormal3f(-1.0f, 0.0f, 0.0f); // Normál vektor
+        glColor3f(0.0f, 0.0f, 1.0f);   // Szín kék
+        glVertex3f(-0.5f, -0.5f, 0.5f);  // elülső bal alsó
+        glVertex3f(-0.5f, -0.5f, -0.5f); // hátsó bal alsó
+        glVertex3f(-0.5f, 0.5f, -0.5f);  // hátsó bal felső
+        glVertex3f(-0.5f, 0.5f, 0.5f);   // elülső bal felső
+    
+        // Jobb oldal
+        glNormal3f(1.0f, 0.0f, 0.0f); // Normál vektor
+        glColor3f(1.0f, 1.0f, 0.0f);   // Szín sárga
+        glVertex3f(0.5f, -0.5f, 0.5f);  // elülső jobb alsó
+        glVertex3f(0.5f, -0.5f, -0.5f); // hátsó jobb alsó
+        glVertex3f(0.5f, 0.5f, -0.5f);  // hátsó jobb felső
+        glVertex3f(0.5f, 0.5f, 0.5f);   // elülső jobb felső
+    
+        // Felső oldal
+        glNormal3f(0.0f, 1.0f, 0.0f); // Normál vektor
+        glColor3f(1.0f, 0.0f, 1.0f);   // Szín lila
+        glVertex3f(-0.5f, 0.5f, 0.5f);  // elülső bal felső
+        glVertex3f(0.5f, 0.5f, 0.5f);   // elülső jobb felső
+        glVertex3f(0.5f, 0.5f, -0.5f);  // hátsó jobb felső
+        glVertex3f(-0.5f, 0.5f, -0.5f); // hátsó bal felső
+    
+        // Alsó oldal
+        glNormal3f(0.0f, -1.0f, 0.0f); // Normál vektor
+        glColor3f(0.0f, 1.0f, 1.0f);   // Szín cián
+        glVertex3f(-0.5f, -0.5f, 0.5f);  // elülső bal alsó
+        glVertex3f(0.5f, -0.5f, 0.5f);   // elülső jobb alsó
+        glVertex3f(0.5f, -0.5f, -0.5f);  // hátsó jobb alsó
+        glVertex3f(-0.5f, -0.5f, -0.5f); // hátsó bal alsó
+    
+        glEnd();    
+}
