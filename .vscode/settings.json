@@ -2,6 +2,7 @@
     "files.associations": {
         "sdl.h": "c",
         "sdl_image.h": "c",
-        "glu.h": "c"
+        "glu.h": "c",
+        "pendulum.h": "c"
     }
 }
