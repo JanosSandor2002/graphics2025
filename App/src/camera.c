@@ -1,21 +1,19 @@
 #include "camera.h"
-
 #include <GL/gl.h>
-
 #include <math.h>
+#include <stdio.h>
 
 void init_camera(Camera* camera)
 {
     camera->position.x = 0.0;
     camera->position.y = 0.0;
-    camera->position.z = 1.0;
+    camera->position.z = 1.0;  // Kezdeti z-pozíció
     camera->rotation.x = 0.0;
     camera->rotation.y = 0.0;
     camera->rotation.z = 0.0;
     camera->speed.x = 0.0;
     camera->speed.y = 0.0;
-    camera->speed.z = 0.0;
-
+    camera->speed.z = 0.0;  // Kezdeti függőleges sebesség (fel-le)
     camera->is_preview_visible = false;
 }
 
@@ -27,10 +25,21 @@ void update_camera(Camera* camera, double time)
     angle = degree_to_radian(camera->rotation.z);
     side_angle = degree_to_radian(camera->rotation.z + 90.0);
 
+    // Előre-hátra, balra-jobbra mozgás
     camera->position.x += cos(angle) * camera->speed.y * time;
     camera->position.y += sin(angle) * camera->speed.y * time;
     camera->position.x += cos(side_angle) * camera->speed.x * time;
     camera->position.y += sin(side_angle) * camera->speed.x * time;
+
+    // Függőleges mozgás (felfelé/lefelé)
+    camera->position.z -= camera->speed.z * time;
+
+    // Ne engedjük, hogy a z pozíció ne menjen 0 alá
+    if (camera->position.z < 1.0) {
+        camera->position.z = 1.0;
+    } 
+   printf("Camera position: x=%.2f, y=%.2f, z=%.2f\n", camera->position.x, camera->position.y, camera->position.z);
+
 }
 
 void set_view(const Camera* camera)
@@ -67,12 +76,17 @@ void rotate_camera(Camera* camera, double horizontal, double vertical)
 
 void set_camera_speed(Camera* camera, double speed)
 {
-    camera->speed.y = speed;
+    camera->speed.y = speed;  // Előre-hátra mozgás sebessége
 }
 
 void set_camera_side_speed(Camera* camera, double speed)
 {
-    camera->speed.x = speed;
+    camera->speed.x = speed;  // Balra-jobbra mozgás sebessége
+}
+
+void set_camera_vertical_speed(Camera* camera, double speed)
+{
+    camera->speed.z = speed;  // Függőleges mozgás sebessége
 }
 
 void show_texture_preview()

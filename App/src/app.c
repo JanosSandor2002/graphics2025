@@ -145,6 +145,12 @@ void handle_app_events(App* app)
             case SDL_SCANCODE_D:
                 set_camera_side_speed(&(app->camera), -1);
                 break;
+            case SDL_SCANCODE_X:
+                set_camera_vertical_speed(&(app->camera), -1);  // Le mozgás
+                break;
+            case SDL_SCANCODE_Z:
+                set_camera_vertical_speed(&(app->camera), 1);   // Fel mozgás
+                break;
             default:
                 break;
             }
@@ -158,6 +164,10 @@ void handle_app_events(App* app)
             case SDL_SCANCODE_A:
             case SDL_SCANCODE_D:
                 set_camera_side_speed(&(app->camera), 0);
+                break;
+            case SDL_SCANCODE_X:
+            case SDL_SCANCODE_Z:
+                set_camera_vertical_speed(&(app->camera), 0);  // Megállítja a függőleges mozgást
                 break;
             default:
                 break;
