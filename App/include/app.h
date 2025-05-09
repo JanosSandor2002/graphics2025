@@ -17,6 +17,7 @@ typedef struct App
     SDL_GLContext gl_context;
     bool is_running;
     double uptime;
+    bool show_help;
     Camera camera;
     Scene scene;
 } App;
