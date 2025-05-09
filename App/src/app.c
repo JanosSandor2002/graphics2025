@@ -5,6 +5,14 @@
 #include <GL/glu.h>
 #include "stb_easy_font.h"
 
+#ifndef GL_BGR
+#define GL_BGR 0x80E0
+#endif
+
+#ifndef GL_BGRA
+#define GL_BGRA 0x80E1
+#endif
+
 void draw_help_text();
 
 void init_app(App* app, int width, int height)
@@ -50,6 +58,9 @@ void init_app(App* app, int width, int height)
 
     app->is_running = true;
     app->show_help = false;  // Súgó alapból kikapcsolva
+    app->help_texture = load_texture("help.png");
+    app->show_help = false;
+
 }
 
 void init_opengl()
@@ -141,10 +152,10 @@ void handle_app_events(App* app)
             case SDL_SCANCODE_D:
                 set_camera_side_speed(&(app->camera), -1);
                 break;
-            case SDL_SCANCODE_X:
+            case SDL_SCANCODE_SPACE:
                 set_camera_vertical_speed(&(app->camera), -1);
                 break;
-            case SDL_SCANCODE_Z:
+            case SDL_SCANCODE_C:
                 set_camera_vertical_speed(&(app->camera), 1);
                 break;
             case SDL_SCANCODE_F1:
@@ -164,8 +175,8 @@ void handle_app_events(App* app)
             case SDL_SCANCODE_D:
                 set_camera_side_speed(&(app->camera), 0);
                 break;
-            case SDL_SCANCODE_X:
-            case SDL_SCANCODE_Z:
+            case SDL_SCANCODE_C:
+            case SDL_SCANCODE_SPACE:
                 set_camera_vertical_speed(&(app->camera), 0);
                 break;
             default:
@@ -225,6 +236,37 @@ void render_app(App* app)
     if (app->show_help) {
         draw_help_text();
     }
+
+    if (app->show_help) {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 800, 600, 0, -1, 1);  // 800x600 képernyőhöz
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, app->help_texture);
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex2f(0, 0);         // Bal felso
+        glTexCoord2f(1, 0); glVertex2f(800, 0);       // Jobb felso
+        glTexCoord2f(1, 1); glVertex2f(800, 600);     // Jobb also
+        glTexCoord2f(0, 1); glVertex2f(0, 600);       // Bal also
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    }
+
 
     SDL_GL_SwapWindow(app->window);
 }
