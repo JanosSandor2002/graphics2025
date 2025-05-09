@@ -1,8 +1,19 @@
 #include "app.h"
 #include <stdio.h>
 #include <SDL2/SDL_image.h>
-#include <GL/gl.h>       // Alap OpenGL függvények
-#include <GL/glu.h>      // GLUT függvények (szükség esetén)
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include "stb_easy_font.h"
+
+#ifndef GL_BGR
+#define GL_BGR 0x80E0
+#endif
+
+#ifndef GL_BGRA
+#define GL_BGRA 0x80E1
+#endif
+
+void draw_help_text();
 
 void init_app(App* app, int width, int height)
 {
@@ -46,6 +57,10 @@ void init_app(App* app, int width, int height)
     init_scene(&(app->scene));
 
     app->is_running = true;
+    app->show_help = false;  // Súgó alapból kikapcsolva
+    app->help_texture = load_texture("help.png");
+    app->show_help = false;
+
 }
 
 void init_opengl()
@@ -65,24 +80,21 @@ void init_opengl()
 
     glEnable(GL_TEXTURE_2D);
 
-    // Világítás beállítása
-    GLfloat light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };  // Fény pozíció
-    GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };   // Diffúz fény színe
-    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };  // Speculáris fény színe
+    GLfloat light_position[] = { 1.0f, 1.0f, 1.0f, 0.0f };
+    GLfloat light_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    GLfloat light_specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);  // Fény pozíciójának beállítása
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);    // Diffúz fény színe
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);  // Speculáris fény színe
-    glEnable(GL_LIGHT0);  // Engedélyezés
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+    glEnable(GL_LIGHT0);
 
-    glEnable(GL_LIGHTING);  // Világítás engedélyezése
+    glEnable(GL_LIGHTING);
 
-    // Anyagtulajdonságok beállítása
-    GLfloat mat_diffuse[] = { 1.0f, 0.0f, 0.0f, 1.0f };  // Piros anyag szín (diffúz komponens)
-    GLfloat mat_specular[] = { 0.0f, 1.0f, 0.0f, 1.0f }; // Zöld anyag szín (speculáris komponens)
-    GLfloat mat_shininess[] = { 100.0f };  // Fényvisszaverő képesség (shininess)
+    GLfloat mat_diffuse[] = { 1.0f, 0.0f, 0.0f, 1.0f };
+    GLfloat mat_specular[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+    GLfloat mat_shininess[] = { 100.0f };
 
-    // Anyagtulajdonságok beállítása
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
@@ -99,8 +111,7 @@ void reshape(GLsizei width, GLsizei height)
         h = height;
         x = (width - w) / 2;
         y = 0;
-    }
-    else {
+    } else {
         w = width;
         h = (int)((double)width / VIEWPORT_RATIO);
         x = 0;
@@ -110,11 +121,7 @@ void reshape(GLsizei width, GLsizei height)
     glViewport(x, y, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(
-        -.08, .08,
-        -.06, .06,
-        .1, 10
-    );
+    glFrustum(-.08, .08, -.06, .06, .1, 10);
 }
 
 void handle_app_events(App* app)
@@ -145,11 +152,14 @@ void handle_app_events(App* app)
             case SDL_SCANCODE_D:
                 set_camera_side_speed(&(app->camera), -1);
                 break;
-            case SDL_SCANCODE_X:
-                set_camera_vertical_speed(&(app->camera), -1);  // Le mozgás
+            case SDL_SCANCODE_SPACE:
+                set_camera_vertical_speed(&(app->camera), -1);
                 break;
-            case SDL_SCANCODE_Z:
-                set_camera_vertical_speed(&(app->camera), 1);   // Fel mozgás
+            case SDL_SCANCODE_C:
+                set_camera_vertical_speed(&(app->camera), 1);
+                break;
+            case SDL_SCANCODE_F1:
+                app->show_help = !app->show_help;
                 break;
             default:
                 break;
@@ -165,9 +175,9 @@ void handle_app_events(App* app)
             case SDL_SCANCODE_D:
                 set_camera_side_speed(&(app->camera), 0);
                 break;
-            case SDL_SCANCODE_X:
-            case SDL_SCANCODE_Z:
-                set_camera_vertical_speed(&(app->camera), 0);  // Megállítja a függőleges mozgást
+            case SDL_SCANCODE_C:
+            case SDL_SCANCODE_SPACE:
+                set_camera_vertical_speed(&(app->camera), 0);
                 break;
             default:
                 break;
@@ -223,6 +233,41 @@ void render_app(App* app)
         show_texture_preview();
     }
 
+    if (app->show_help) {
+        draw_help_text();
+    }
+
+    if (app->show_help) {
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0, 800, 600, 0, -1, 1);  // 800x600 képernyőhöz
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, app->help_texture);
+
+    glColor3f(1.0f, 1.0f, 1.0f);
+
+    glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex2f(0, 0);         // Bal felso
+        glTexCoord2f(1, 0); glVertex2f(800, 0);       // Jobb felso
+        glTexCoord2f(1, 1); glVertex2f(800, 600);     // Jobb also
+        glTexCoord2f(0, 1); glVertex2f(0, 600);       // Bal also
+    glEnd();
+
+    glDisable(GL_TEXTURE_2D);
+
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    }
+
+
     SDL_GL_SwapWindow(app->window);
 }
 
@@ -237,4 +282,24 @@ void destroy_app(App* app)
     }
 
     SDL_Quit();
+}
+
+void draw_help_text()
+{
+    char buffer[99999];
+    int num_quads;
+    float x = 10, y = 10;
+    const char* text = "Iranyitas:\nW/S/A/D - Mozgas\nZ/X - Fel/Le\nEgér - Forgatas\nF1 - Segitseg ki/be";
+
+    glDisable(GL_TEXTURE_2D);
+    glColor3f(1, 0, 0); // Fehér szöveg
+
+    num_quads = stb_easy_font_print(x, y, (char*)text, NULL, buffer, sizeof(buffer));
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(2, GL_FLOAT, 16, buffer);
+    glDrawArrays(GL_QUADS, 0, num_quads * 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
+
+    glEnable(GL_TEXTURE_2D);
 }
