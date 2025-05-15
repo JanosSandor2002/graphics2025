@@ -13,4 +13,6 @@ Demos/Week_7/cube.exe
 Demos/Week_8/pendulum/pendulum.exe
 Demos/Week_8/ball/ball.exe
 .vscode
-minta
+main.o
+main.exe
+Camera.o
