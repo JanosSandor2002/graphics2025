@@ -1,0 +1,477 @@
+==== Camera.c ====
+#include "Camera.h"
+#include <math.h>
+
+#define DEG2RAD(x) ((x)*3.14159265f/180.0f)
+
+void Camera_Init(Camera* cam, float x, float y, float z) {
+    cam->posX = x;
+    cam->posY = y;
+    cam->posZ = z;
+    cam->yaw = -90.0f;  // alapból nézünk az -Z irányba
+    cam->pitch = 0.0f;
+}
+
+void Camera_Move(Camera* cam, float forward, float right, float up) {
+    float radYaw = DEG2RAD(cam->yaw);
+    float radPitch = DEG2RAD(cam->pitch);
+
+    // előre hátra mozgás XY síkon a yaw alapján (Y felfelé)
+    cam->posX += forward * cosf(radYaw);
+    cam->posZ += forward * sinf(radYaw);
+
+    // oldalirányú mozgás (jobbra balra)
+    cam->posX += right * cosf(radYaw + 3.14159265f / 2);
+    cam->posZ += right * sinf(radYaw + 3.14159265f / 2);
+
+    // függőleges mozgás
+    cam->posY += up;
+}
+
+void Camera_Rotate(Camera* cam, float deltaYaw, float deltaPitch) {
+    cam->yaw += deltaYaw;
+    cam->pitch += deltaPitch;
+
+    if (cam->pitch > 89.0f) cam->pitch = 89.0f;
+    if (cam->pitch < -89.0f) cam->pitch = -89.0f;
+}
+
+void Camera_ApplyView(const Camera* cam) {
+    float radYaw = DEG2RAD(cam->yaw);
+    float radPitch = DEG2RAD(cam->pitch);
+
+    float dirX = cosf(radYaw) * cosf(radPitch);
+    float dirY = sinf(radPitch);
+    float dirZ = sinf(radYaw) * cosf(radPitch);
+
+    gluLookAt(
+        cam->posX, cam->posY, cam->posZ,
+        cam->posX + dirX, cam->posY + dirY, cam->posZ + dirZ,
+        0.0f, 1.0f, 0.0f
+    );
+}
+
+
+==== main.c ====
+#include <stdio.h>
+#include <stdlib.h>
+#include <GL/freeglut.h>
+#include <SOIL/SOIL.h>
+#include "Camera.h"
+#include <math.h>
+#include "Model.h"
+
+Camera camera;
+Model* glass = NULL;
+
+int keyStates[256] = {0};
+int mouseLeftDown = 0;
+int lastMouseX, lastMouseY;
+
+GLuint glassTexture = 0;
+GLuint helpTexture = 0;
+int showHelp = 0; 
+float glassAlpha = 0.3f;
+int buttonPressed = 0;  // 0 = nincs lenyomva, 1 = lenyomva
+
+
+void handleKeys() {
+    float speed = 0.1f;
+    if (keyStates['w']) Camera_Move(&camera, speed, 0, 0);
+    if (keyStates['s']) Camera_Move(&camera, -speed, 0, 0);
+    if (keyStates['a']) Camera_Move(&camera, 0, -speed, 0);
+    if (keyStates['d']) Camera_Move(&camera, 0, speed, 0);
+    if (keyStates[' ']) Camera_Move(&camera, 0, 0, speed);
+    if (keyStates['c']) Camera_Move(&camera, 0, 0, -speed);
+
+    if (camera.posY < 1.0f) {
+        camera.posY = 1.0f;
+    }
+}
+
+void checkButtonPress() {
+    float dx = camera.posX - 0.0f;
+    float dy = camera.posY - 0.0f;
+    float dz = camera.posZ - 0.0f;
+    float distance = sqrtf(dx*dx + dy*dy + dz*dz);
+
+    if (!buttonPressed && distance < 1.0f) {  // pl. 1.0 egység
+        buttonPressed = 1;
+        printf("Gomb lenyomva!\n");
+    }
+}
+
+void display() {
+    glClearColor(0.0f, 0.07f, 0.27f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glLoadIdentity();
+    Camera_ApplyView(&camera);
+
+    // 1. Nem átlátszó objektumokat ide tedd, ha vannak
+
+    // 2. Átlátszó objektum (üveg) renderelése:
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, glassTexture);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDepthMask(GL_FALSE);  // ne írjuk a depth bufferbe az átlátszó dolgokat
+
+    float minY = get_model_min_y(glass);
+    printf("minY: %f\n", minY);
+    glPushMatrix();
+    glTranslatef(0.0f, -minY * 11.0f, 0.0f);
+    //glTranslatef(0.0f, 4.5f, 0.0f);
+
+    glScalef(11.0f, 11.0f, 11.0f);  // méretezés, ha kell
+    glColor4f(1.0f, 1.0f, 1.0f, glassAlpha);
+    draw_model(glass);           // az OBJ modell kirajzolása
+    glPopMatrix();
+
+    glDepthMask(GL_TRUE);   // visszakapcsoljuk a depth buffer írást
+    glDisable(GL_BLEND);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_CULL_FACE);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // Help text megjelenítése (2D overlay)
+    if (showHelp && helpTexture != 0) {
+        // Átváltás 2D-re
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+
+        int w = glutGet(GLUT_WINDOW_WIDTH);
+        int h = glutGet(GLUT_WINDOW_HEIGHT);
+        gluOrtho2D(0, w, 0, h);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, helpTexture);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glColor4f(1, 1, 1, glassAlpha);
+
+        glBegin(GL_QUADS);
+            glTexCoord2f(0, 0); glVertex2f(0, 0);
+            glTexCoord2f(1, 0); glVertex2f(w, 0);
+            glTexCoord2f(1, 1); glVertex2f(w, h);
+            glTexCoord2f(0, 1); glVertex2f(0, h);
+        glEnd();
+
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+        glEnable(GL_DEPTH_TEST);
+
+        glPopMatrix();
+        glMatrixMode(GL_PROJECTION);
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+    }
+
+    glutSwapBuffers();
+}
+
+void reshape(int w, int h) {
+    if (h == 0) h = 1;
+    float aspect = (float)w / (float)h;
+    glViewport(0, 0, w, h);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60.0, aspect, 0.1, 100.0);
+
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void keyboardDown(unsigned char key, int x, int y) {
+    keyStates[key] = 1;
+    if (key == '+') {
+        glassAlpha += 0.05f;
+        if (glassAlpha > 1.0f) glassAlpha = 1.0f;
+        glutPostRedisplay();
+    } else if (key == '-') {
+        glassAlpha -= 0.05f;
+        if (glassAlpha < 0.05f) glassAlpha = 0.05f;
+        glutPostRedisplay();
+    }
+}
+
+void keyboardUp(unsigned char key, int x, int y) {
+    keyStates[key] = 0;
+}
+
+void mouseButton(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            mouseLeftDown = 1;
+            lastMouseX = x;
+            lastMouseY = y;
+        } else {
+            mouseLeftDown = 0;
+        }
+    }
+}
+
+void mouseMotion(int x, int y) {
+    if (mouseLeftDown) {
+        int dx = x - lastMouseX;
+        int dy = y - lastMouseY;
+        float sensitivity = 0.2f;
+        Camera_Rotate(&camera, dx * sensitivity, -dy * sensitivity);
+        lastMouseX = x;
+        lastMouseY = y;
+        glutPostRedisplay();
+    }
+}
+
+void timer(int val) {
+    handleKeys();
+    glutPostRedisplay();
+    glutTimerFunc(16, timer, 0);
+    checkButtonPress();
+}
+
+void specialKeyDown(int key, int x, int y) {
+    if (key == GLUT_KEY_F1) {
+        showHelp = !showHelp;
+        glutPostRedisplay();
+    }
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutCreateWindow("3D Kamera SOIL + FreeGLUT - Glass");
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+
+    Camera_Init(&camera, 1.0f, 5.0f, 30.0f);
+
+    glass = load_model("assets/models/glass.obj");  // vagy a saját OBJ fájlod neve
+    if (!glass) {
+        printf("Nem sikerult betolteni a glass.obj modellt.\n");
+        return 1;
+        }
+
+    glassTexture = SOIL_load_OGL_texture(
+        "assets/textures/glass.png",
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_INVERT_Y
+    );
+    if (glassTexture == 0) {
+        printf("Nem sikerult betolteni a glass.png texturat: '%s'\n", SOIL_last_result());
+        return 1;
+    } 
+
+    helpTexture = SOIL_load_OGL_texture(
+        "assets/textures/help.png",
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_INVERT_Y
+    );
+    if (helpTexture == 0) {
+        printf("Nem sikerult betolteni a help.png texturat: '%s'\n", SOIL_last_result());
+        // Nem feltétlenül kell kilépni, csak nem lesz help kép
+    }
+
+    glutSpecialFunc(specialKeyDown);
+
+    glutDisplayFunc(display);
+    glutReshapeFunc(reshape);
+    glutKeyboardFunc(keyboardDown);
+    glutKeyboardUpFunc(keyboardUp);
+    glutMouseFunc(mouseButton);
+    glutMotionFunc(mouseMotion);
+    glutTimerFunc(16, timer, 0);
+
+    glutMainLoop();
+    return 0;
+}
+
+
+==== Model.c ====
+#include "Model.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <GL/gl.h>  // OpenGL fejlécek (győződj meg róla, hogy elérhető)
+
+Model* load_model(const char* filename) {
+    FILE* file = fopen(filename, "r");
+    if (!file) {
+        perror("Could not open OBJ file");
+        return NULL;
+    }
+
+    Model* model = calloc(1, sizeof(Model));
+
+    size_t vertex_cap = 1024;
+    size_t texcoord_cap = 1024;
+    size_t normal_cap = 1024;
+    size_t face_cap = 1024;
+
+    model->vertices = malloc(vertex_cap * sizeof(Vertex));
+    model->texcoords = malloc(texcoord_cap * sizeof(TexCoord));
+    model->normals = malloc(normal_cap * sizeof(Normal));
+    model->faces = malloc(face_cap * sizeof(Face));
+
+    char line[256];
+
+    while (fgets(line, sizeof(line), file)) {
+        if (strncmp(line, "v ", 2) == 0) {
+            if (model->vertex_count >= vertex_cap) {
+                vertex_cap *= 2;
+                model->vertices = realloc(model->vertices, vertex_cap * sizeof(Vertex));
+            }
+            sscanf(line + 2, "%f %f %f",
+                &model->vertices[model->vertex_count].x,
+                &model->vertices[model->vertex_count].y,
+                &model->vertices[model->vertex_count].z);
+            model->vertex_count++;
+        } else if (strncmp(line, "vt ", 3) == 0) {
+            if (model->texcoord_count >= texcoord_cap) {
+                texcoord_cap *= 2;
+                model->texcoords = realloc(model->texcoords, texcoord_cap * sizeof(TexCoord));
+            }
+            sscanf(line + 3, "%f %f",
+                &model->texcoords[model->texcoord_count].u,
+                &model->texcoords[model->texcoord_count].v);
+            model->texcoord_count++;
+        } else if (strncmp(line, "vn ", 3) == 0) {
+            if (model->normal_count >= normal_cap) {
+                normal_cap *= 2;
+                model->normals = realloc(model->normals, normal_cap * sizeof(Normal));
+            }
+            sscanf(line + 3, "%f %f %f",
+                &model->normals[model->normal_count].x,
+                &model->normals[model->normal_count].y,
+                &model->normals[model->normal_count].z);
+            model->normal_count++;
+        } else if (strncmp(line, "f ", 2) == 0) {
+            if (model->face_count >= face_cap) {
+                face_cap *= 2;
+                model->faces = realloc(model->faces, face_cap * sizeof(Face));
+            }
+
+            Face* f = &model->faces[model->face_count];
+            sscanf(line + 2, "%u/%u/%u %u/%u/%u %u/%u/%u",
+                &f->v1, &f->vt1, &f->vn1,
+                &f->v2, &f->vt2, &f->vn2,
+                &f->v3, &f->vt3, &f->vn3);
+            // Convert to zero-based indexing
+            f->v1--; f->vt1--; f->vn1--;
+            f->v2--; f->vt2--; f->vn2--;
+            f->v3--; f->vt3--; f->vn3--;
+
+            model->face_count++;
+        }
+    }
+
+    fclose(file);
+    return model;
+}
+
+void draw_model(const Model* model) {
+    if (!model) return;
+
+    glBegin(GL_TRIANGLES);
+    for (unsigned int i = 0; i < model->face_count; i++) {
+        Face* f = &model->faces[i];
+
+        if (model->normal_count > 0) {
+            glNormal3f(
+                model->normals[f->vn1].x,
+                model->normals[f->vn1].y,
+                model->normals[f->vn1].z);
+        }
+        if (model->texcoord_count > 0) {
+            glTexCoord2f(
+                model->texcoords[f->vt1].u,
+                model->texcoords[f->vt1].v);
+        }
+        glVertex3f(
+            model->vertices[f->v1].x,
+            model->vertices[f->v1].y,
+            model->vertices[f->v1].z);
+
+        if (model->normal_count > 0) {
+            glNormal3f(
+                model->normals[f->vn2].x,
+                model->normals[f->vn2].y,
+                model->normals[f->vn2].z);
+        }
+        if (model->texcoord_count > 0) {
+            glTexCoord2f(
+                model->texcoords[f->vt2].u,
+                model->texcoords[f->vt2].v);
+        }
+        glVertex3f(
+            model->vertices[f->v2].x,
+            model->vertices[f->v2].y,
+            model->vertices[f->v2].z);
+
+        if (model->normal_count > 0) {
+            glNormal3f(
+                model->normals[f->vn3].x,
+                model->normals[f->vn3].y,
+                model->normals[f->vn3].z);
+        }
+        if (model->texcoord_count > 0) {
+            glTexCoord2f(
+                model->texcoords[f->vt3].u,
+                model->texcoords[f->vt3].v);
+        }
+        glVertex3f(
+            model->vertices[f->v3].x,
+            model->vertices[f->v3].y,
+            model->vertices[f->v3].z);
+    }
+    glEnd();
+}
+
+void free_model(Model* model) {
+    if (!model) return;
+
+    free(model->vertices);
+    free(model->texcoords);
+    free(model->normals);
+    free(model->faces);
+    free(model);
+}
+float get_model_min_y(const Model* model) {
+    if (!model || model->vertex_count == 0) return 0.0f;
+
+    float minY = model->vertices[0].y;
+    for (unsigned int i = 1; i < model->vertex_count; i++) {
+        if (model->vertices[i].y < minY) {
+            minY = model->vertices[i].y;
+        }
+    }
+    return minY;
+}
+
+
+

@@ -7,7 +7,7 @@ void Camera_Init(Camera* cam, float x, float y, float z) {
     cam->posX = x;
     cam->posY = y;
     cam->posZ = z;
-    cam->yaw = -90.0f;  // alapból nézünk az -Z irányba
+    cam->yaw = -90.0f;  // alapból nézünk az -Z irány
     cam->pitch = 0.0f;
 }
 
