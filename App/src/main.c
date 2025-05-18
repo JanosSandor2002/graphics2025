@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include <math.h>
 #include "Model.h"
+#include "Fog.h"
 
 Camera camera;
 Model* glass = NULL;
@@ -69,7 +70,6 @@ void display() {
     glDepthMask(GL_FALSE);  // ne írjuk a depth bufferbe az átlátszó dolgokat
 
     float minY = get_model_min_y(glass);
-    printf("minY: %f\n", minY);
     glPushMatrix();
     glTranslatef(0.0f, -minY * 11.0f, 0.0f);
     //glTranslatef(0.0f, 4.5f, 0.0f);
@@ -212,6 +212,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("3D Kamera SOIL + FreeGLUT - Glass");
 
     glEnable(GL_DEPTH_TEST);
+    init_fog();
     glDisable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glDisable(GL_LIGHTING);

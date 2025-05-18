@@ -8,7 +8,7 @@ void Camera_Init(Camera* cam, float x, float y, float z) {
     cam->posX = x;
     cam->posY = y;
     cam->posZ = z;
-    cam->yaw = -90.0f;  // alapból nézünk az -Z irányba
+    cam->yaw = -90.0f;  // alapból nézünk az -Z irány
     cam->pitch = 0.0f;
 }
 
@@ -52,6 +52,21 @@ void Camera_ApplyView(const Camera* cam) {
 }
 
 
+==== Fog.c ====
+#include "Fog.h"
+#include <GL/gl.h>
+
+void init_fog() {
+    GLfloat fogColor[] = {0.7f, 0.7f, 0.7f, 1.0f};  // szürkés köd
+
+    glEnable(GL_FOG);
+    glFogi(GL_FOG_MODE, GL_EXP2);                 // erősebb köd típus
+    glFogfv(GL_FOG_COLOR, fogColor);              // köd színe
+    glFogf(GL_FOG_DENSITY, 0.08f);                // ködsűrűség – nagyobb = sűrűbb
+    glHint(GL_FOG_HINT, GL_NICEST);               // jobb minőség
+}
+
+
 ==== main.c ====
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,9 +75,11 @@ void Camera_ApplyView(const Camera* cam) {
 #include "Camera.h"
 #include <math.h>
 #include "Model.h"
+#include "Fog.h"
 
 Camera camera;
 Model* glass = NULL;
+Model* button = NULL;
 
 int keyStates[256] = {0};
 int mouseLeftDown = 0;
@@ -123,7 +140,6 @@ void display() {
     glDepthMask(GL_FALSE);  // ne írjuk a depth bufferbe az átlátszó dolgokat
 
     float minY = get_model_min_y(glass);
-    printf("minY: %f\n", minY);
     glPushMatrix();
     glTranslatef(0.0f, -minY * 11.0f, 0.0f);
     //glTranslatef(0.0f, 4.5f, 0.0f);
@@ -137,6 +153,14 @@ void display() {
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_CULL_FACE);
+
+    // Gomb kirajzolása a 0,0,0 pontban scale 2,2,2-vel
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, 0.0f);
+    glScalef(2.0f, 2.0f, 2.0f);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // teljesen átlátszatlan
+    draw_model(button);
+    glPopMatrix();
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -258,6 +282,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("3D Kamera SOIL + FreeGLUT - Glass");
 
     glEnable(GL_DEPTH_TEST);
+    init_fog();
     glDisable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glDisable(GL_LIGHTING);
@@ -272,6 +297,12 @@ int main(int argc, char** argv) {
     glass = load_model("assets/models/glass.obj");  // vagy a saját OBJ fájlod neve
     if (!glass) {
         printf("Nem sikerult betolteni a glass.obj modellt.\n");
+        return 1;
+        }
+
+    button = load_model("assets/models/button.obj");
+    if (!button) {
+        printf("Nem sikerult betolteni a button.obj modellt.\n");
         return 1;
         }
 
