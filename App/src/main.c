@@ -3,6 +3,7 @@
 #include <SDL2/SDL_opengl.h>
 #include <SOIL/SOIL.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <math.h>
 #include "Camera.h"
 #include "Model.h"
@@ -10,6 +11,9 @@
 
 int windowWidth = 800;
 int windowHeight = 600;
+float buttonPressAnim = 0.0f;
+bool buttonRemove = false;
+float glassRotation = 0.0f;
 
 SDL_Window* window = NULL;
 SDL_GLContext glContext;
@@ -26,7 +30,6 @@ int mouseLeftDown = 0;
 int lastMouseX, lastMouseY;
 int showHelp = 0;
 float glassAlpha = 0.3f;
-int buttonPressed = 0;
 
 void handleKeys() {
     float speed = 0.1f;
@@ -40,14 +43,31 @@ void handleKeys() {
     if (camera.posY < 1.0f) camera.posY = 1.0f;
 }
 
-void checkButtonPress() {
-    float dx = camera.posX - 0.0f;
-    float dy = camera.posY - 0.0f;
-    float dz = camera.posZ - 0.0f;
-    float distance = sqrtf(dx*dx + dy*dy + dz*dz);
-    if (!buttonPressed && distance < 1.0f) {
-        buttonPressed = 1;
-        printf("Gomb lenyomva!\n");
+void updateButtonPressAnim() {
+        float dx = camera.posX - 0.0f;
+        float dy = camera.posY - 0.0f;
+        float dz = camera.posZ - 0.0f;
+        float distance = sqrtf(dx*dx + dy*dy + dz*dz);
+
+        float target = (distance < 1.5f) ? 1.0f : 0.0f;
+        float speed = 0.02f; // animáció sebessége (nagyobb gyorsabb)
+
+        if (buttonPressAnim < target) {
+            buttonPressAnim += speed;
+            if (buttonPressAnim > target) buttonPressAnim = target;
+        } else if (buttonPressAnim > target) {
+            buttonPressAnim -= speed;
+            if (buttonPressAnim < target) buttonPressAnim = target;
+        }
+        printf("Distance to button: %f\n", distance);
+
+        float targetRotation = (buttonPressAnim > 0.9f) ? 90.0f : 0.0f;
+        float rotSpeed = 2.0f; // fok / képkocka (állítsd lassabbra/gyorsabbra)
+
+        if (buttonPressAnim > 0.9f && glassRotation < 90.0f) {
+        float rotSpeed = 2.0f;
+        glassRotation += rotSpeed;
+        if (glassRotation > 90.0f) glassRotation = 90.0f;
     }
 }
 
@@ -71,6 +91,11 @@ void display() {
     glPushMatrix();
     glTranslatef(0.0f, -minY * 11.0f, 0.0f);
     glScalef(11.0f, 11.0f, 11.0f);
+
+    if (glassRotation > 0.0f) {
+    glRotatef(glassRotation, 1.0f, 0.0f, 0.0f);
+}
+
     glColor4f(1.0f, 1.0f, 1.0f, glassAlpha);
     draw_model(glass);
     glPopMatrix();
@@ -81,12 +106,20 @@ void display() {
     glDisable(GL_CULL_FACE);
 
     // Gomb kirajzolása
-    glPushMatrix();
-    glTranslatef(0.0f, 0.0f, 0.0f);
-    glScalef(2.0f, 0.6667f, 2.0f);
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    draw_model(button);
-    glPopMatrix();
+    if (!buttonRemove) {
+    float yScale = 0.6667f * (1.0f - buttonPressAnim);
+
+    if (yScale > 0.001f) { //még nem teljesen lenyomott
+        glPushMatrix();
+        glTranslatef(0.0f, 0.0f, 0.0f);
+        glScalef(2.0f, yScale, 2.0f);
+        glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+        draw_model(button);
+        glPopMatrix();
+    } else {
+        buttonRemove = true; // csak akkor állítsuk be, ha valóban lenyomódott
+    }
+    }
 
     // Help overlay
     if (showHelp && helpTexture != 0) {
@@ -217,14 +250,14 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    glassTexture = SOIL_load_OGL_texture("assets/textures/glass.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
-    helpTexture = SOIL_load_OGL_texture("assets/textures/help.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_INVERT_Y);
+    glassTexture = SOIL_load_OGL_texture("assets/textures/glass.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
+    helpTexture = SOIL_load_OGL_texture("assets/textures/help.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 
     SDL_Event e;
     while (1) {
         processEvents(&e);
         handleKeys();
-        checkButtonPress();
+        updateButtonPressAnim();
         display();
         SDL_Delay(16);  // ~60 FPS
     }
