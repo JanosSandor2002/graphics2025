@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include <math.h>
+#include <GL/glu.h>  // Hibajavítás: szükséges a gluLookAt használatához
 
 #define DEG2RAD(x) ((x)*3.14159265f/180.0f)
 
@@ -7,7 +8,7 @@ void Camera_Init(Camera* cam, float x, float y, float z) {
     cam->posX = x;
     cam->posY = y;
     cam->posZ = z;
-    cam->yaw = -90.0f;  // alapból nézünk az -Z irány
+    cam->yaw = -90.0f;
     cam->pitch = 0.0f;
 }
 
@@ -15,15 +16,12 @@ void Camera_Move(Camera* cam, float forward, float right, float up) {
     float radYaw = DEG2RAD(cam->yaw);
     float radPitch = DEG2RAD(cam->pitch);
 
-    // előre hátra mozgás XY síkon a yaw alapján (Y felfelé)
     cam->posX += forward * cosf(radYaw);
     cam->posZ += forward * sinf(radYaw);
 
-    // oldalirányú mozgás (jobbra balra)
     cam->posX += right * cosf(radYaw + 3.14159265f / 2);
     cam->posZ += right * sinf(radYaw + 3.14159265f / 2);
 
-    // függőleges mozgás
     cam->posY += up;
 }
 
