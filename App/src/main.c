@@ -1,7 +1,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
-#include <SOIL/SOIL.h>
+#include <SOIL.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <math.h>

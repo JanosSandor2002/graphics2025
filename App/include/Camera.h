@@ -1,7 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <GL/freeglut.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+
 
 typedef struct {
     float posX, posY, posZ;
