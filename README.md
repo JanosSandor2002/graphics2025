@@ -9,8 +9,9 @@ Miskolci Egyetem, Számítógépes Grafika tantárgy
 
 ## Projekt leírás
 
-A felhasználó egy óriási pohár belsejébe kerül egy 3D-s térben.  
-A kamera szabadon mozgatható egérrel és billentyűzettel.  
+A felhasználó egy óriási, üres pohár belsejébe kerül egy 3D-s térben.
+A pohár teljes terét sűrű, vastag köd tölti ki, ami megnehezíti a látást és különleges atmoszférát teremt.
+A kamera szabadon mozgatható egérrel és billentyűzettel.
 A jelenetek és interakciók folyamatosan váltakoznak az animáció során.
 
 ---
@@ -31,15 +32,16 @@ A jelenetek és interakciók folyamatosan váltakoznak az animáció során.
   - A pohár teljesen kiürül.
 
 - **utojelenet**  
-  - Egy animált kocka görbén végighalad a pohár külső falán.  
-  - A poharat visszaállítja az eredeti pozícióba (víz nélkül).
+  - Visszaállít minden modellt a helyére.
 
 ---
 
 ### Interakciók
 
 - **Kamera irányítás:**  
-  `WASD` + egér mozgatás (szabad nézet)
+  `WASD` + egér mozgatás (szabad nézet és irányítás)
+
+  `SPACE` + `C` fel és le mozgás
 
 - **Fényerő szabályozás:**  
   `+` és `-` billentyűkkel

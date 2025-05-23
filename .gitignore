@@ -1,3 +1,4 @@
+.vscode
 Demos/Week_1/1_1.exe
 Demos/Week_2/matrix.exe
 Demos/Week_3/main.exe
@@ -12,7 +13,5 @@ Demos/Week_6/cube.exe
 Demos/Week_7/cube.exe
 Demos/Week_8/pendulum/pendulum.exe
 Demos/Week_8/ball/ball.exe
-.vscode
-main.o
-main.exe
-Camera.o
+App/src/masolas.bat
+App/src/c_fajlok.txt
