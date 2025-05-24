@@ -14,6 +14,8 @@ static int windowHeight = 600;
 static float buttonPressAnim = 0.0f;
 static bool buttonRemove = false;
 static float glassRotation = 0.0f;
+static float waterHeight = 1.0f;
+static float waterWidth = 1.0f;
 
 static SDL_Window* window = NULL;
 static SDL_GLContext glContext;
@@ -21,7 +23,9 @@ static SDL_GLContext glContext;
 static Camera camera;
 static Model* glass = NULL;
 static Model* button = NULL;
+static Model* water = NULL;
 
+static GLuint waterTexture = 0;
 static GLuint glassTexture = 0;
 static GLuint helpTexture = 0;
 
@@ -57,7 +61,10 @@ void App_Init() {
 void App_LoadContent() {
     glass = load_model("assets/models/glass.obj");
     button = load_model("assets/models/button.obj");
+    water = load_model("assets/models/water.obj");
+
     glassTexture = SOIL_load_OGL_texture("assets/textures/glass.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
+    waterTexture = SOIL_load_OGL_texture("assets/textures/water.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0); // ha van
     helpTexture = SOIL_load_OGL_texture("assets/textures/help.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, 0);
 }
 
@@ -163,10 +170,39 @@ void App_Render() {
     draw_model(glass);
     glPopMatrix();
 
+    if (glassRotation >= 90.0f && waterHeight > 0.0f) {
+        float waterDecreaseSpeed = 0.002f;
+
+        waterHeight -= waterDecreaseSpeed;
+        waterWidth -= waterDecreaseSpeed / 2;
+        if (waterHeight < 0.0f) waterHeight = 0.0f;
+    }
+
     glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
     glDisable(GL_TEXTURE_2D);
     glDisable(GL_CULL_FACE);
+
+     // Water
+    if (water && waterHeight > 0.0f) {
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, waterTexture);  // ha van
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glDepthMask(GL_FALSE);
+
+        glPushMatrix();
+        glTranslatef(0.0f, 11.0f * waterHeight, 0.0f);
+        if (glassRotation > 0.0f) glRotatef(glassRotation, 1.0f, 0.0f, 0.0f);
+        glScalef(10.0f * waterWidth, 10.0f, 10.0f * waterHeight);
+        glColor4f(0.2f, 0.4f, 1.0f, 0.5f);
+        draw_model(water);
+        glPopMatrix();
+
+        glDepthMask(GL_TRUE);
+        glDisable(GL_BLEND);
+        glDisable(GL_TEXTURE_2D);
+    }
 
     // Button
     if (!buttonRemove) {
@@ -219,6 +255,7 @@ void App_Render() {
 
 void App_Cleanup() {
     free_model(glass);
+    free_model(water);
     free_model(button);
     SDL_GL_DeleteContext(glContext);
     SDL_DestroyWindow(window);
