@@ -132,6 +132,19 @@ void App_Update() {
     float target = (distance < 1.5f) ? 1.0f : 0.0f;
     float speed = 0.02f;
 
+    if (distance > 32.0f) {
+        // Reset all relevant state
+        buttonPressAnim = 0.0f;
+        buttonRemove = false;
+        glassRotation = 0.0f;
+        waterHeight = 1.0f;
+        waterWidth = 1.0f;
+
+        // Reset camera pozíció
+        Camera_Init(&camera, 1.0f, 5.0f, 30.0f);
+    }
+
+    printf("Distance: %6f", distance);
     if (buttonPressAnim < target) {
         buttonPressAnim += speed;
         if (buttonPressAnim > target) buttonPressAnim = target;
