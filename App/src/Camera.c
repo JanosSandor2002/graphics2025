@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include <math.h>
-#include <GL/glu.h>  // Hibajavítás: szükséges a gluLookAt használatához
+#include <GL/glu.h>
 
 #define DEG2RAD(x) ((x)*3.14159265f/180.0f)
 

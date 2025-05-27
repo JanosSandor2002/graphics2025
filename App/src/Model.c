@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <GL/gl.h>  // OpenGL fejlécek (győződj meg róla, hogy elérhető)
+#include <GL/gl.h>
 
 Model* load_model(const char* filename) {
     FILE* file = fopen(filename, "r");

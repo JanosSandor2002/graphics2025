@@ -34,6 +34,8 @@ static int mouseLeftDown = 0;
 static int lastMouseX, lastMouseY;
 static int showHelp = 0;
 static float glassAlpha = 0.3f;
+static float waterAlpha = 0.5f;
+static float buttonAlpha = 1.0f;
 
 void App_Init() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -79,10 +81,18 @@ void App_ProcessEvents(SDL_Event* e) {
                 if (e->key.keysym.sym == SDLK_F1) showHelp = !showHelp;
                 if (e->key.keysym.sym == SDLK_PLUS || e->key.keysym.sym == SDLK_KP_PLUS) {
                     glassAlpha += 0.05f;
+                    waterAlpha += 0.025f;
+                    buttonAlpha += 0.05f;
                     if (glassAlpha > 1.0f) glassAlpha = 1.0f;
+                    if (waterAlpha > 1.0f) waterAlpha = 1.0f;
+                    if (buttonAlpha > 1.0f) buttonAlpha = 1.0f;
                 } else if (e->key.keysym.sym == SDLK_MINUS || e->key.keysym.sym == SDLK_KP_MINUS) {
                     glassAlpha -= 0.05f;
+                    waterAlpha -= 0.025f;
+                    buttonAlpha -= 0.05f;
                     if (glassAlpha < 0.05f) glassAlpha = 0.05f;
+                    if (waterAlpha < 0.025f) waterAlpha = 0.025f;
+                    if (buttonAlpha < 0.05f) buttonAlpha = 0.05f;
                 }
                 break;
             case SDL_KEYUP:
@@ -132,7 +142,7 @@ void App_Update() {
     float target = (distance < 1.5f) ? 1.0f : 0.0f;
     float speed = 0.02f;
 
-    if (distance > 32.0f) {
+    if (distance > 40.0f) {
         // Reset all relevant state
         buttonPressAnim = 0.0f;
         buttonRemove = false;
@@ -144,7 +154,7 @@ void App_Update() {
         Camera_Init(&camera, 1.0f, 5.0f, 30.0f);
     }
 
-    printf("Distance: %6f", distance);
+    //printf("Distance: %6f", distance);
     if (buttonPressAnim < target) {
         buttonPressAnim += speed;
         if (buttonPressAnim > target) buttonPressAnim = target;
@@ -199,7 +209,7 @@ void App_Render() {
      // Water
     if (water && waterHeight > 0.0f) {
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, waterTexture);  // ha van
+        glBindTexture(GL_TEXTURE_2D, waterTexture);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glDepthMask(GL_FALSE);
@@ -208,7 +218,7 @@ void App_Render() {
         glTranslatef(0.0f, 11.0f * waterHeight, 0.0f);
         if (glassRotation > 0.0f) glRotatef(glassRotation, 1.0f, 0.0f, 0.0f);
         glScalef(10.0f * waterWidth, 10.0f, 10.0f * waterHeight);
-        glColor4f(0.2f, 0.4f, 1.0f, 0.5f);
+        glColor4f(0.2f, 0.4f, 1.0f, waterAlpha);
         draw_model(water);
         glPopMatrix();
 
@@ -223,7 +233,7 @@ void App_Render() {
         if (yScale > 0.001f) {
             glPushMatrix();
             glScalef(2.0f, yScale, 2.0f);
-            glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+            glColor4f(0.0f, 0.0f, 1.0f, buttonAlpha);
             draw_model(button);
             glPopMatrix();
         } else {
@@ -245,7 +255,7 @@ void App_Render() {
         glBindTexture(GL_TEXTURE_2D, helpTexture);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glColor4f(1, 1, 1, glassAlpha);
+        glColor4f(1, 1, 1, 1);
 
         glBegin(GL_QUADS);
         glTexCoord2f(0, 0); glVertex2f(0, 0);

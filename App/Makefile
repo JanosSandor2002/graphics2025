@@ -1,7 +1,7 @@
 CC = gcc
 
-INCLUDES = -Iinclude -Isoil -Ifreeglut -IC:/Users/User/Desktop/programing/c_sdk_220203/MinGW/include
-LIBS = -LC:/SDL2/lib -lSDL2 -lSDL2main soil/libSOIL.a -lopengl32 -lglu32
+INCLUDES = -Iinclude -Isoil -IMinGW/include
+LIBS = -LMinGW/lib -lSDL2 -lSDL2main soil/libSOIL.a -lopengl32 -lglu32
 
 CAMERA_OBJ = src/Camera.o
 MODEL_OBJ = src/Model.o

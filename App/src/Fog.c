@@ -2,7 +2,7 @@
 #include <GL/gl.h>
 
 void init_fog() {
-    GLfloat fogColor[] = {0.7f, 0.7f, 0.7f, 1.0f};
+    GLfloat fogColor[] = {0.7f, 0.7f, 0.7f, 1.0f}; //lighter gray colour
 
     glEnable(GL_FOG);
     glFogi(GL_FOG_MODE, GL_EXP2);
