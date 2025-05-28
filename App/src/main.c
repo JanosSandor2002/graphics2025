@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
         App_HandleKeys();
         App_Update();
         App_Render();
-        SDL_Delay(16);
+        SDL_Delay(16); //ms
     }
 
     App_Cleanup();

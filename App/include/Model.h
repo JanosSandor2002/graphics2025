@@ -36,4 +36,4 @@ Model* load_model(const char* filename);
 void free_model(Model* model);
 float get_model_min_y(const Model* model);
 
-#endif // MODEL_H
+#endif

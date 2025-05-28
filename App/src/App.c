@@ -40,16 +40,16 @@ static float buttonAlpha = 1.0f;
 void App_Init() {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1); //smooth animations
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24); //Z-
 
     window = SDL_CreateWindow("SDL + OpenGL Kamera", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                               windowWidth, windowHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-    glContext = SDL_GL_CreateContext(window);
+    glContext = SDL_GL_CreateContext(window); //render context
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //actual - background weight
     init_fog();
 
     glMatrixMode(GL_PROJECTION);
@@ -170,8 +170,8 @@ void App_Update() {
 }
 
 void App_Render() {
-    glClearColor(0.0f, 0.07f, 0.27f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.0f, 0.07f, 0.27f, 1.0f); //darker blue
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //no mix
     glLoadIdentity();
     Camera_ApplyView(&camera);
 
@@ -182,7 +182,7 @@ void App_Render() {
     glBindTexture(GL_TEXTURE_2D, glassTexture);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDepthMask(GL_FALSE);
+    glDepthMask(GL_FALSE); //no write to depth buffer
 
     float minY = get_model_min_y(glass);
     glPushMatrix();
@@ -218,7 +218,7 @@ void App_Render() {
         glTranslatef(0.0f, 11.0f * waterHeight, 0.0f);
         if (glassRotation > 0.0f) glRotatef(glassRotation, 1.0f, 0.0f, 0.0f);
         glScalef(10.0f * waterWidth, 10.0f, 10.0f * waterHeight);
-        glColor4f(0.2f, 0.4f, 1.0f, waterAlpha);
+        glColor4f(0.2f, 0.4f, 1.0f, waterAlpha); // lighter bluish
         draw_model(water);
         glPopMatrix();
 
